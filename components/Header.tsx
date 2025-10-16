@@ -8,12 +8,25 @@ const Header: React.FC = () => {
                 Penerjemah Bahasa Unang Depok
             </h1>
             <p className="mt-2 text-md sm:text-lg text-slate-600">
-                Menerjemahkan Bahasa Indonesia ke bahasa gaul Depok dengan pola: <code className="bg-slate-200 text-slate-700 font-mono p-1 rounded-md text-sm">U(x) (b)n(c)ng</code>
+                Menerjemahkan Bahasa Indonesia ke bahasa gaul Depok berdasarkan pola linguistik yang unik.
             </p>
-            <div className="mt-4 text-left text-sm text-slate-500 bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1">
-                <p><strong className="font-semibold text-slate-700 w-6 inline-block">x:</strong> Suku kata terakhir, semua vokal diubah menjadi 'a'.</p>
-                <p><strong className="font-semibold text-slate-700 w-6 inline-block">b:</strong> Kata asli tanpa suku kata terakhir.</p>
-                <p><strong className="font-semibold text-slate-700 w-6 inline-block">c:</strong> Vokal terakhir dari suku kata terakhir asli.</p>
+            <div className="mt-4 text-left text-sm text-slate-500 bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
+                <p>Pola dasarnya adalah <code className="bg-slate-200 text-slate-700 font-mono p-1 rounded-md text-sm">U(x) (b)n(c)ng</code>, namun ada beberapa aturan khusus:</p>
+                <ul className="list-disc list-inside pl-2 space-y-1">
+                    <li>
+                        <strong>Aturan Konsonan:</strong> Konsonan di akhir suku kata bisa "pindah" ke suku kata terakhir.
+                        <br/><em className="text-slate-400 ml-4">Contoh: <strong className="text-slate-600">Hancur</strong> &rarr; Uncar hanung</em>
+                        <br/><em className="text-slate-400 ml-4">Contoh: <strong className="text-slate-600">Sebentar</strong> &rarr; Untar sebenang</em>
+                    </li>
+                    <li>
+                        <strong>Aturan Satu Suku Kata:</strong> Bagian (b) dihilangkan.
+                        <br/><em className="text-slate-400 ml-4">Contoh: <strong className="text-slate-600">Bel</strong> &rarr; Ubal neng</em>
+                    </li>
+                    <li>
+                        <strong>Aturan Akhiran 'nya':</strong> Pola diterapkan pada kata dasarnya.
+                        <br/><em className="text-slate-400 ml-4">Contoh: <strong className="text-slate-600">Sepedanya</strong> &rarr; Uda sepenangnya</em>
+                    </li>
+                </ul>
             </div>
         </header>
     );

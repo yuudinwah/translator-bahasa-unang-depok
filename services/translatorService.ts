@@ -1,49 +1,111 @@
+// This service contains the core logic for translating between Indonesian and Bahasa Unang Depok.
 
-// This regex is designed to find the last syllable of an Indonesian word.
-// It looks for an optional consonant, one or more vowels, and zero or more consonants at the end of a string.
-const SYLLABLE_REGEX = /[bcdfghjklmnpqrstvwxyz]?[aeiou]+[bcdfghjklmnpqrstvwxyz]*$/i;
+const translateToUnangWord = (word: string): string => {
+    if (word.trim().length < 2) return word;
 
-const translateWord = (word: string): string => {
-    // Ignore short or empty words
-    if (word.trim().length < 2) {
-        return word;
+    const vowels = 'aeiouAEIOU';
+    let lastVowelIndex = -1;
+    for (let i = word.length - 1; i >= 0; i--) {
+        if (vowels.includes(word[i])) {
+            lastVowelIndex = i;
+            break;
+        }
+    }
+
+    // If no vowels, can't translate
+    if (lastVowelIndex === -1) return word;
+
+    let syllableStartIndex = lastVowelIndex;
+    if (lastVowelIndex > 0 && !vowels.includes(word[lastVowelIndex - 1])) {
+        syllableStartIndex = lastVowelIndex - 1;
     }
     
-    const lastSyllableMatch = word.match(SYLLABLE_REGEX);
-
-    // If no syllable with a vowel is found, return the original word
-    if (!lastSyllableMatch) {
-        return word;
-    }
-
-    const lastSyllable = lastSyllableMatch[0];
-    // 'b' is the part of the word before the last syllable
-    const b = word.substring(0, word.length - lastSyllable.length);
+    const lastSyllable = word.substring(syllableStartIndex);
+    const b = word.substring(0, syllableStartIndex);
 
     const vowelsInSyllable = lastSyllable.match(/[aeiou]/ig);
-    // This is a safeguard; the regex should ensure there's at least one vowel
-    if (!vowelsInSyllable) {
-        return word;
-    }
-    // 'c' is the last vowel of the original last syllable
-    const c = vowelsInSyllable[vowelsInSyllable.length - 1];
+    if (!vowelsInSyllable) return word;
 
-    // 'x' is the last syllable with all its vowels replaced by 'a'
+    const c = vowelsInSyllable[vowelsInSyllable.length - 1];
     const x = lastSyllable.replace(/[aeiou]/ig, 'a');
 
-    // Assemble the final word based on the formula: U(x)(b)n(c)ng
-    return `U${x.toLowerCase()}${b.toLowerCase()}n${c.toLowerCase()}ng`;
+    // New format with space: U(x) (b)n(c)ng
+    return `U${x.toLowerCase()} ${b.toLowerCase()}n${c.toLowerCase()}ng`;
 };
 
-export const translateText = (text: string): string => {
-    // Split the text by whitespace while preserving it, to maintain formatting like newlines
-    const segments = text.split(/(\s+)/); 
+const translateFromUnangPair = (word1: string, word2: string): string => {
+    // word1 is U(x), word2 is (b)n(c)ng
+    const BNC_REGEX = /^(.*)n([aeiou])ng$/i;
+    
+    const x_part = word1.substring(1).toLowerCase(); // remove U
+    const bnc_match = word2.match(BNC_REGEX);
+
+    if (!bnc_match) {
+        return `${word1} ${word2}`; 
+    }
+
+    const [, b_part, c_part] = bnc_match;
+
+    // Recreate the original last syllable by replacing 'a's with the captured vowel 'c'
+    const originalLastSyllable = x_part.replace(/a/g, c_part.toLowerCase());
+
+    return `${b_part}${originalLastSyllable}`;
+};
+
+const processText = (text: string, translatorFunc: (word: string) => string): string => {
+    // Split by spaces and punctuation, keeping the delimiters
+    const segments = text.split(/([\s.,;!?]+)/); 
     
     return segments.map(segment => {
-        // If the segment is just whitespace or empty, return it as is
-        if (/^\s*$/.test(segment)) {
-            return segment;
-        }
-        return translateWord(segment);
+        // Don't translate delimiters
+        if (/^[\s.,;!?]+$/.test(segment) || segment === '') return segment;
+        return translatorFunc(segment);
     }).join('');
+}
+
+export const translateToUnangText = (text: string): string => {
+    return processText(text, translateToUnangWord);
+};
+
+export const reverseTranslateText = (text: string): string => {
+    const segments = text.split(/([\s.,;!?]+)/);
+    let result = [];
+    let i = 0;
+
+    while (i < segments.length) {
+        const segment1 = segments[i];
+
+        // If it's a delimiter or empty, just add it and continue
+        if (/^[\s.,;!?]+$/.test(segment1) || segment1 === '') {
+            result.push(segment1);
+            i++;
+            continue;
+        }
+
+        // It's a word. Let's find the next word, skipping over delimiters.
+        let spaceDelimiter = '';
+        let nextWordIndex = -1;
+        for (let j = i + 1; j < segments.length; j++) {
+            if (/^[\s.,;!?]+$/.test(segments[j])) {
+                spaceDelimiter += segments[j];
+            } else {
+                nextWordIndex = j;
+                break;
+            }
+        }
+        
+        const segment2 = nextWordIndex !== -1 ? segments[nextWordIndex] : null;
+        
+        // Check if the pair matches the Unang pattern. A space in between is required.
+        if (segment1.toLowerCase().startsWith('u') && segment2 && /n[aeiou]ng$/i.test(segment2) && spaceDelimiter.includes(' ')) {
+            result.push(translateFromUnangPair(segment1, segment2));
+            i = nextWordIndex + 1; // Jump index past the second word
+        } else {
+            // Not a translatable pair, just add the first segment
+            result.push(segment1);
+            i++;
+        }
+    }
+    
+    return result.join('');
 };

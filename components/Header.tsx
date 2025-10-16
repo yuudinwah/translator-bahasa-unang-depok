@@ -8,7 +8,7 @@ const Header: React.FC = () => {
                 Penerjemah Bahasa Unang Depok
             </h1>
             <p className="mt-2 text-md sm:text-lg text-slate-600">
-                Menerjemahkan Bahasa Indonesia ke bahasa gaul Depok dengan pola: <code className="bg-slate-200 text-slate-700 font-mono p-1 rounded-md text-sm">U(x)(b)n(c)ng</code>
+                Menerjemahkan Bahasa Indonesia ke bahasa gaul Depok dengan pola: <code className="bg-slate-200 text-slate-700 font-mono p-1 rounded-md text-sm">U(x) (b)n(c)ng</code>
             </p>
             <div className="mt-4 text-left text-sm text-slate-500 bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1">
                 <p><strong className="font-semibold text-slate-700 w-6 inline-block">x:</strong> Suku kata terakhir, semua vokal diubah menjadi 'a'.</p>
